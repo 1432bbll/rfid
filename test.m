@@ -66,7 +66,32 @@
 
 
 
-a = '1001100';
-b = 15;
-c = bitand(bin2dec(a),b);
-disp (c);
+% % 创建一个图形窗口，并记录其句柄
+% fig = figure;
+% 
+% % 绘制一些初始图形
+% xlabel('x');
+% ylabel('y');
+% title('Combined Plot');
+% legend;
+% 
+% % 保存图形句柄到工作区，以便第二个文件可以使用
+% assignin('base', 'fig_handle', fig);
+
+% 创建图形窗口并获取句柄
+fig = figure;
+
+% 在主脚本中进行初始绘制
+% x = linspace(0, 2*pi, 100);
+% y = sin(x);
+% plot(x, y, 'b', 'DisplayName', 'sin(x)');
+xlabel('x');
+ylabel('y');
+title('Combined Plot');
+legend;
+
+
+% 调用类方法进行额外绘制
+plot_obj = PlotClass(fig);
+plot_obj.add_plot();
+

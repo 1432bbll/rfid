@@ -206,6 +206,214 @@
 %     end
 % end
 
+% classdef tag
+%     properties
+%         x_tag
+%         y_tag
+%         z_tag
+%         x_reader
+%         y_reader
+%         z_reader
+%         num
+%         name
+%         state       %1:ready 2：arbitrate 3:reply 4:acknowledged 5:open 6:secured 7:killed
+%         RN16_1
+%         RN16_2
+%         slot_counter
+%         PC
+%         EPC
+%         CRC_16  
+%         % inventoried_flag % 库存：A/B
+%         % session         % 会话
+%         % killpassword
+%         % accesspassword
+%         %RNG
+%     end
+% 
+%     methods      
+% 
+%         function obj = tag(new_name,epc,i)
+%             %对标签命名
+%             obj.name = new_name;
+%             obj.EPC = epc;
+%             obj.num = i;
+%             obj.state = tagstate.ready;
+%         end
+% 
+%         function [obj,readerbin,tagbin] = listen(obj,readerbin,tmptagbin)
+%             %收听信号
+% 
+%             [signalkind,signalvalue] = decode(readerbin);
+%             % disp("55");
+%             [newsignalkind,newsignalvalue] = decode(tmptagbin);
+%             % disp("66");
+%             tagbin = tmptagbin;
+%             disp(obj.name + " reflect " + signalkind+" slot:"+num2str(obj.slot_counter)+" state:"+ string(obj.state));
+%             if isempty(signalkind)==0
+%                 switch obj.state
+%                     case tagstate.ready
+%                         switch signalkind(1)
+%                             case 1
+%                                 obj.RN16_1 = randi(2^12)-1;
+%                                 obj.RN16_2 = dec2bin(obj.RN16_1,16);
+%                                 obj.slot_counter = randi(2^signalvalue(1))-1;
+%                                 if obj.slot_counter == 0
+%                                     %backscatter new RN16
+% 
+%                                     newsignalkind(length(newsignalkind)+1) = 6;
+%                                     newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1*10 + obj.num;
+%                                     tagbin = encode(newsignalkind,newsignalvalue);
+%                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
+%                                     obj.state = tagstate.reply;
+%                                     disp(obj.name + " change state to reply");
+%                                 elseif obj.slot_counter > 0 
+%                                     obj.state = tagstate.arbitrate;
+%                                     disp(obj.name + " change state to arbitrate");
+%                                 end
+%                         end
+%                     case tagstate.arbitrate
+%                         switch signalkind(1)
+%                             case 1
+%                                 obj.slot_counter = randi(2^signalvalue(1))-1;
+%                                 obj.RN16_1 = randi(2^12)-1;
+%                                 obj.RN16_2 = dec2bin(obj.RN16_1,16);
+%                                 if obj.slot_counter == 0
+%                                     %backscatter new RN16
+% 
+%                                     newsignalkind(length(newsignalkind)+1) = 6;
+%                                     newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1*10 + obj.num;
+%                                     tagbin = encode(newsignalkind,newsignalvalue);
+%                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
+%                                     obj.state = tagstate.reply;
+%                                     disp(obj.name + " change state to reply");
+%                                 elseif obj.slot_counter > 0 
+%                                     obj.state = tagstate.arbitrate;
+%                                     disp(obj.name + " slot_counter : " + obj.slot_counter)
+%                                 else 
+%                                     obj.state = tagstate.ready;
+%                                     disp(obj.name + " change state to ready");
+%                                 end
+%                             case 3
+%                                 %obj.slot_counter = randi(2^signalvalue(1))-1;
+%                                 obj.slot_counter = obj.slot_counter - 1;
+%                                 if obj.slot_counter == 0
+%                                     %backscatter new RN16
+%                                     newsignalkind(length(newsignalkind)+1) = 6;
+%                                     newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1*10 + obj.num;
+%                                     tagbin = encode(newsignalkind,newsignalvalue);
+%                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
+%                                     obj.state = tagstate.reply;
+%                                     disp(obj.name + " change state to reply");
+%                                 elseif obj.slot_counter > 0 
+% 
+%                                     obj.state = tagstate.arbitrate;
+%                                     disp(obj.name + " slot_counter : " + obj.slot_counter)
+%                                 end
+%                             case 2  
+%                                 obj.slot_counter = randi(2^signalvalue(1)+1)-1;
+%                                 if obj.slot_counter == 0
+%                                     %backscatter new RN16
+%                                     newsignalkind(length(newsignalkind)+1) = 6;
+%                                     newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1*10 + obj.num;
+%                                     tagbin = encode(newsignalkind,newsignalvalue);
+%                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
+%                                     obj.state = tagstate.reply;
+%                                     disp(obj.name + " change state to reply");
+%                                 elseif obj.slot_counter > 0 
+%                                     obj.state = tagstate.arbitrate;
+%                                     disp(obj.name + " slot_counter : " + obj.slot_counter)
+%                                 end
+%                         end 
+%                     case tagstate.reply
+%                         switch signalkind(1)
+%                             case 1
+%                                 obj.slot_counter = randi(2^signalvalue(1)+1)-1;
+%                                 if obj.slot_counter == 0
+%                                     %backscatter new RN16
+%                                     obj.RN16_1 = randi(2^16)-1;
+%                                     obj.RN16_2 = dec2bin(obj.RN16_1,16);
+%                                     newsignalkind(length(newsignalkind)+1) = 6;
+%                                     newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1*10 + obj.num;
+%                                     tagbin = encode(newsignalkind,newsignalvalue);
+%                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
+%                                     obj.state = tagstate.reply;
+%                                 elseif obj.slot_counter > 0 
+%                                     obj.state = tagstate.arbitrate;
+%                                     disp(obj.name + " slot_counter : " + obj.slot_counter)
+%                                 else 
+%                                     obj.state = tagstate.ready;
+%                                 end
+%                             case 2
+%                                 obj.slot_counter = randi(signalvalue(1)+1)-1;
+%                                 if obj.slot_counter == 0
+%                                     %backscatter new RN16
+%                                     newsignalkind(length(newsignalkind)+1) = 6;
+%                                     newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1*10 + obj.num;
+%                                     tagbin = encode(newsignalkind,newsignalvalue);
+%                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
+%                                     obj.state = tagstate.reply;
+%                                 elseif obj.slot_counter > 0 
+%                                     obj.state = tagstate.arbitrate;
+%                                 end
+%                             case 3
+%                                     obj.state = tagstate.arbitrate;
+%                             case 4
+%                                 if obj.RN16_1 * 10 +obj.num == signalvalue(1)
+% 
+%                                     newsignalkind(length(newsignalkind)+1) = 7;
+%                                     newsignalvalue(length(newsignalvalue)+1) = obj.EPC;
+%                                     tagbin = encode(newsignalkind,newsignalvalue);
+%                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
+%                                     obj.state = tagstate.acknowledged;
+%                                 else 
+%                                     obj.state = tagstate.arbitrate;
+%                                 end
+%                             case 5
+%                                 obj.state = tagstate.arbitrate;
+%                         end
+%                     case tagstate.acknowledged
+%                         switch signalkind(1)
+%                             case 1
+%                                 % obj.slot_counter = randi(signalvalue(1)+1)-1;
+%                                 % if obj.slot_counter == 0
+%                                 %     %backscatter new RN16
+%                                 %     obj.RN16_1 = randi(1000000);
+%                                 %     newsignalkind(length(newsignalkind)+1) = 1;
+%                                 %     newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1;
+%                                 %     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
+%                                 %     obj.state = tagstate.reply;
+%                                 % elseif obj.slot_counter > 0 
+%                                 %     obj.state = tagstate.arbitrate;
+%                                 % end
+%                                 obj.state = tagstate.acknowledged;
+%                             case 3
+%                                 obj.state = tagstate.acknowledged;
+%                             case 2
+%                                 obj.state = tagstate.acknowledged;
+%                             case 4
+%                                 if obj.RN16_1 * 10 +obj.num == signalvalue(1)
+%                                     newsignalkind(length(newsignalkind)+1) = 7;
+%                                     newsignalvalue(length(newsignalvalue)+1) = obj.EPC;
+%                                     tagbin = encode(newsignalkind,newsignalvalue);
+%                                     obj.state = tagstate.acknowledged;
+%                                 elseif obj.RN16_1 * 10 +obj.num ~= signalvalue(1) 
+%                                     %obj.state = tagstate.arbitrate;
+%                                 end
+%                             case 5
+%                                 obj.state = tagstate.arbitrate;
+%                         end
+%                     % case open
+%                     % 
+%                     % case secured
+%                     % 
+%                     % case killed
+% 
+%                 end
+%             end
+%         end       
+%     end
+% end
+
 classdef tag
     properties
         x_tag
@@ -223,6 +431,7 @@ classdef tag
         PC
         EPC
         CRC_16  
+        fig_handle
         % inventoried_flag % 库存：A/B
         % session         % 会话
         % killpassword
@@ -232,21 +441,22 @@ classdef tag
 
     methods      
 
-        function obj = tag(new_name,epc,i)
+        function obj = tag(new_name,epc,i,fig)
             %对标签命名
             obj.name = new_name;
             obj.EPC = epc;
             obj.num = i;
             obj.state = tagstate.ready;
+            obj.fig_handle = fig;
         end
 
-        function [obj,readerbin,tagbin] = listen(obj,readerbin,tmptagbin)
+        function [obj,readerbin,tagbin,command_time] = listen(obj,readerbin,tmptagbin,starttime)
             %收听信号
-
-            [signalkind,signalvalue] = decode(readerbin);
-            % disp("55");
-            [newsignalkind,newsignalvalue] = decode(tmptagbin);
-            % disp("66");
+            command_time = 0;
+            disp(strlength(readerbin));
+            disp("55");
+            [signalkind,signalvalue] = readerdecode(readerbin);
+            disp("66");
             tagbin = tmptagbin;
             disp(obj.name + " reflect " + signalkind+" slot:"+num2str(obj.slot_counter)+" state:"+ string(obj.state));
             if isempty(signalkind)==0
@@ -260,9 +470,11 @@ classdef tag
                                 if obj.slot_counter == 0
                                     %backscatter new RN16
 
-                                    newsignalkind(length(newsignalkind)+1) = 6;
-                                    newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1*10 + obj.num;
-                                    tagbin = encode(newsignalkind,newsignalvalue);
+                                    newsignalkind = 6;
+                                    newsignalvalue = obj.RN16_1;
+                                    tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
+                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6);
+                                    command_time = 4.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.reply;
                                     disp(obj.name + " change state to reply");
@@ -280,9 +492,11 @@ classdef tag
                                 if obj.slot_counter == 0
                                     %backscatter new RN16
 
-                                    newsignalkind(length(newsignalkind)+1) = 6;
-                                    newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1*10 + obj.num;
-                                    tagbin = encode(newsignalkind,newsignalvalue);
+                                    newsignalkind = 6;
+                                    newsignalvalue = obj.RN16_1;
+                                    tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
+                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6);
+                                    command_time = 4.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.reply;
                                     disp(obj.name + " change state to reply");
@@ -298,9 +512,11 @@ classdef tag
                                 obj.slot_counter = obj.slot_counter - 1;
                                 if obj.slot_counter == 0
                                     %backscatter new RN16
-                                    newsignalkind(length(newsignalkind)+1) = 6;
-                                    newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1*10 + obj.num;
-                                    tagbin = encode(newsignalkind,newsignalvalue);
+                                    newsignalkind = 6;
+                                    newsignalvalue = obj.RN16_1;
+                                    tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
+                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6);
+                                    command_time = 4.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.reply;
                                     disp(obj.name + " change state to reply");
@@ -313,9 +529,11 @@ classdef tag
                                 obj.slot_counter = randi(2^signalvalue(1)+1)-1;
                                 if obj.slot_counter == 0
                                     %backscatter new RN16
-                                    newsignalkind(length(newsignalkind)+1) = 6;
-                                    newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1*10 + obj.num;
-                                    tagbin = encode(newsignalkind,newsignalvalue);
+                                    newsignalkind = 6;
+                                    newsignalvalue = obj.RN16_1;
+                                    tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
+                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6);
+                                    command_time = 4.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.reply;
                                     disp(obj.name + " change state to reply");
@@ -332,9 +550,11 @@ classdef tag
                                     %backscatter new RN16
                                     obj.RN16_1 = randi(2^16)-1;
                                     obj.RN16_2 = dec2bin(obj.RN16_1,16);
-                                    newsignalkind(length(newsignalkind)+1) = 6;
-                                    newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1*10 + obj.num;
-                                    tagbin = encode(newsignalkind,newsignalvalue);
+                                    newsignalkind = 6;
+                                    newsignalvalue = obj.RN16_1;
+                                    tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
+                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6);
+                                    command_time = 4.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.reply;
                                 elseif obj.slot_counter > 0 
@@ -347,9 +567,11 @@ classdef tag
                                 obj.slot_counter = randi(signalvalue(1)+1)-1;
                                 if obj.slot_counter == 0
                                     %backscatter new RN16
-                                    newsignalkind(length(newsignalkind)+1) = 6;
-                                    newsignalvalue(length(newsignalvalue)+1) = obj.RN16_1*10 + obj.num;
-                                    tagbin = encode(newsignalkind,newsignalvalue);
+                                    newsignalkind = 6;
+                                    newsignalvalue = obj.RN16_1;
+                                    tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
+                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6);
+                                    command_time = 4.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.reply;
                                 elseif obj.slot_counter > 0 
@@ -358,11 +580,13 @@ classdef tag
                             case 3
                                     obj.state = tagstate.arbitrate;
                             case 4
-                                if obj.RN16_1 * 10 +obj.num == signalvalue(1)
+                                if obj.RN16_1 == signalvalue(1)
 
-                                    newsignalkind(length(newsignalkind)+1) = 7;
-                                    newsignalvalue(length(newsignalvalue)+1) = obj.EPC;
-                                    tagbin = encode(newsignalkind,newsignalvalue);
+                                    newsignalkind = 7;
+                                    newsignalvalue = obj.EPC;
+                                    tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
+                                    tagdraw_time(starttime,starttime+26.7,obj.num,obj.EPC,obj.fig_handle,7);
+                                    command_time = 26.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.acknowledged;
                                 else 
@@ -392,9 +616,11 @@ classdef tag
                                 obj.state = tagstate.acknowledged;
                             case 4
                                 if obj.RN16_1 * 10 +obj.num == signalvalue(1)
-                                    newsignalkind(length(newsignalkind)+1) = 7;
-                                    newsignalvalue(length(newsignalvalue)+1) = obj.EPC;
-                                    tagbin = encode(newsignalkind,newsignalvalue);
+                                    newsignalkind = 7;
+                                    newsignalvalue = obj.EPC;
+                                    tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
+                                    tagdraw_time(starttime,starttime+26.7,obj.num,obj.EPC,obj.fig_handle,7);
+                                    command_time = 26.7+3.3;
                                     obj.state = tagstate.acknowledged;
                                 elseif obj.RN16_1 * 10 +obj.num ~= signalvalue(1) 
                                     %obj.state = tagstate.arbitrate;
