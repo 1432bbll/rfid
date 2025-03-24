@@ -1,4 +1,4 @@
-function tagdraw_time(starttime,endtime,num,value,fig,kind)
+function tagdraw_time(starttime,endtime,num,value,fig,kind,rssi,phase)
 %DRAW_TIME 此处显示有关此函数的摘要
 %   此处显示详细说明
 figure(fig);
@@ -47,9 +47,9 @@ switch num
 end
 switch kind
     case 6
-        text(mid_x, mid_y, "RN16:"+num2str(value), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+        text(mid_x, mid_y, sprintf("RN16:"+num2str(value)+"\n" + "rssi:"+num2str(rssi)+"\n"+"phase:"+num2str(phase)), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
     case 7
-        text(mid_x, mid_y, "EPC:"+num2str(value), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+        text(mid_x, mid_y, sprintf("EPC:"+num2str(value)+"\n" + "rssi:"+num2str(rssi)+"\n"+"phase:"+num2str(phase)), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
 end
 hold on;
 end

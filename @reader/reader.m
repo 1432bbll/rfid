@@ -224,10 +224,11 @@ classdef reader
         RN16
         NAK
         fig_handle
+        routes
     end
 
     methods
-        function obj = reader(new_name,fig)
+        function obj = reader(new_name,fig,route)
             %对阅读器命名
             obj.name = new_name;
             obj.p = 0.9;
@@ -236,8 +237,12 @@ classdef reader
             obj.NAK = 1;
             obj.mytime = 0;
             obj.fig_handle = fig;
+            obj.routes = route;
         end
-
+        
+        function obj = set_route(obj,route)
+            obj.routes = route;
+        end
         %command
 
         %Select 包含参数 Target、Action、MemBank、Pointer、Length、Mask 和 Truncate。
@@ -290,6 +295,9 @@ classdef reader
                     
                     readerdraw_time(starttime,starttime + 5.2,1,obj.fig_handle);
                     readerbin = encode(newsignalkind,newsignalvalue);
+                    for j = 1:length(obj.routes)
+                        obj.routes(j).send(30,1);
+                    end
                     commandtime = 5.2;
                     disp("666");
                     obj.NAK = 0;
@@ -298,6 +306,9 @@ classdef reader
                     readerdraw_time(starttime,starttime+0.5,3,obj.fig_handle);
                     commandtime = 0.5;
                     readerbin = encode(newsignalkind,newsignalvalue);
+                    for j = 1:length(obj.routes)
+                        obj.routes(j).send(30,1);
+                    end
                 end
             elseif signalkind(1) == 8
                 f = 0;
@@ -316,6 +327,9 @@ classdef reader
                     readerdraw_time(starttime,starttime + 1,2,obj.fig_handle);
                     commandtime = 1.2;
                     readerbin = encode(newsignalkind,newsignalvalue);
+                    for j = 1:length(obj.routes)
+                        obj.routes(j).send(30,1);
+                    end
                 end
             elseif signalkind(1) == 6
                 obj.RN16 = signalvalue(1);
@@ -323,6 +337,9 @@ classdef reader
                 readerdraw_time(starttime,starttime + 6.6,4,obj.fig_handle);
                 commandtime = 6.6;
                 readerbin = encode(newsignalkind,newsignalvalue);
+                for j = 1:length(obj.routes)
+                    obj.routes(j).send(30,2);
+                end
             elseif signalkind(1) == 7
                 disp(obj.name + " listen epc : "+ num2str(signalvalue(1)));
                 fprintf(2,'红颜色\n');
@@ -330,6 +347,9 @@ classdef reader
                 readerdraw_time(starttime,starttime+0.5,3,obj.fig_handle);
                 commandtime = 0.5;
                 readerbin = encode(newsignalkind,newsignalvalue);
+                for j = 1:length(obj.routes)
+                    obj.routes(j).send(30,1);
+                end
             end
         end
     end

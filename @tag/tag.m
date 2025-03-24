@@ -432,6 +432,7 @@ classdef tag
         EPC
         CRC_16  
         fig_handle
+        routes
         % inventoried_flag % 库存：A/B
         % session         % 会话
         % killpassword
@@ -441,13 +442,18 @@ classdef tag
 
     methods      
 
-        function obj = tag(new_name,epc,i,fig)
+        function obj = tag(new_name,epc,i,fig,route)
             %对标签命名
             obj.name = new_name;
             obj.EPC = epc;
             obj.num = i;
             obj.state = tagstate.ready;
             obj.fig_handle = fig;
+            obj.routes = route;
+        end
+        
+        function obj = set_routes(obj,route)
+            obj.routes = route;
         end
 
         function [obj,readerbin,tagbin,command_time] = listen(obj,readerbin,tmptagbin,starttime)
@@ -473,7 +479,9 @@ classdef tag
                                     newsignalkind = 6;
                                     newsignalvalue = obj.RN16_1;
                                     tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
-                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6);
+                                    power = obj.routes.rssi_cal() - 5;
+                                    obj.routes.send(power,2);
+                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6,obj.routes.rssi_cal(),obj.routes.phase_cal());
                                     command_time = 4.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.reply;
@@ -495,7 +503,9 @@ classdef tag
                                     newsignalkind = 6;
                                     newsignalvalue = obj.RN16_1;
                                     tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
-                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6);
+                                    power = obj.routes.rssi_cal() - 5;
+                                    obj.routes.send(power,2);
+                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6,obj.routes.rssi_cal(),obj.routes.phase_cal());
                                     command_time = 4.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.reply;
@@ -515,7 +525,9 @@ classdef tag
                                     newsignalkind = 6;
                                     newsignalvalue = obj.RN16_1;
                                     tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
-                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6);
+                                    power = obj.routes.rssi_cal() - 5;
+                                    obj.routes.send(power,2);
+                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6,obj.routes.rssi_cal(),obj.routes.phase_cal());
                                     command_time = 4.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.reply;
@@ -532,7 +544,9 @@ classdef tag
                                     newsignalkind = 6;
                                     newsignalvalue = obj.RN16_1;
                                     tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
-                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6);
+                                    power = obj.routes.rssi_cal() - 5;
+                                    obj.routes.send(power,2);
+                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6,obj.routes.rssi_cal(),obj.routes.phase_cal());
                                     command_time = 4.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.reply;
@@ -553,7 +567,9 @@ classdef tag
                                     newsignalkind = 6;
                                     newsignalvalue = obj.RN16_1;
                                     tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
-                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6);
+                                    power = obj.routes.rssi_cal() - 5;
+                                    obj.routes.send(power,2);
+                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6,obj.routes.rssi_cal(),obj.routes.phase_cal());
                                     command_time = 4.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.reply;
@@ -570,7 +586,9 @@ classdef tag
                                     newsignalkind = 6;
                                     newsignalvalue = obj.RN16_1;
                                     tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
-                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6);
+                                    power = obj.routes.rssi_cal() - 5;
+                                    obj.routes.send(power,2);
+                                    tagdraw_time(starttime,starttime+4.7,obj.num,obj.RN16_1,obj.fig_handle,6,obj.routes.rssi_cal(),obj.routes.phase_cal());
                                     command_time = 4.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.reply;
@@ -585,7 +603,9 @@ classdef tag
                                     newsignalkind = 7;
                                     newsignalvalue = obj.EPC;
                                     tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
-                                    tagdraw_time(starttime,starttime+26.7,obj.num,obj.EPC,obj.fig_handle,7);
+                                    power = obj.routes.rssi_cal() - 5;
+                                    obj.routes.send(power,2);
+                                    tagdraw_time(starttime,starttime+26.7,obj.num,obj.EPC,obj.fig_handle,7,obj.routes.rssi_cal(),obj.routes.phase_cal());
                                     command_time = 26.7+3.3;
                                     disp(obj.name + " backscatter RN16 : "+ num2str(obj.RN16_1));
                                     obj.state = tagstate.acknowledged;
@@ -619,7 +639,9 @@ classdef tag
                                     newsignalkind = 7;
                                     newsignalvalue = obj.EPC;
                                     tagbin = tagencode(newsignalkind,newsignalvalue,tagbin);
-                                    tagdraw_time(starttime,starttime+26.7,obj.num,obj.EPC,obj.fig_handle,7);
+                                    power = obj.routes.rssi_cal() - 5;
+                                    obj.routes.send(power,2);
+                                    tagdraw_time(starttime,starttime+26.7,obj.num,obj.EPC,obj.fig_handle,7,obj.routes.rssi_cal(),obj.routes.phase_cal());
                                     command_time = 26.7+3.3;
                                     obj.state = tagstate.acknowledged;
                                 elseif obj.RN16_1 * 10 +obj.num ~= signalvalue(1) 

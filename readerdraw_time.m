@@ -23,15 +23,15 @@ mid_y = 0;
 % 添加标注，这里以显示y值为例
 switch kind
     case 1
-        text(mid_x, mid_y, "Query", 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+        text(mid_x, mid_y, sprintf("Query"), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
     case 2
-        text(mid_x, mid_y, "QueryAdjust", 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+        text(mid_x, mid_y, sprintf("QueryAdjust"), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
     case 3
-        text(mid_x, mid_y, "Rep", 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+        text(mid_x, mid_y, sprintf("Rep"), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
     case 4
-        text(mid_x, mid_y, "ACK", 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+        text(mid_x, mid_y, sprintf("ACK"), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
     case 5
-        text(mid_x, mid_y, "NAK", 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+        text(mid_x, mid_y, sprintf("NAK"), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
 end
 hold on;
 end

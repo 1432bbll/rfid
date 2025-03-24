@@ -78,20 +78,45 @@
 % % 保存图形句柄到工作区，以便第二个文件可以使用
 % assignin('base', 'fig_handle', fig);
 
-% 创建图形窗口并获取句柄
-fig = figure;
+% % 创建图形窗口并获取句柄
+% fig = figure;
+% 
+% % 在主脚本中进行初始绘制
+% % x = linspace(0, 2*pi, 100);
+% % y = sin(x);
+% % plot(x, y, 'b', 'DisplayName', 'sin(x)');
+% xlabel('x');
+% ylabel('y');
+% title('Combined Plot');
+% legend;
+% 
+% 
+% % 调用类方法进行额外绘制
+% plot_obj = PlotClass(fig);
+% plot_obj.add_plot();
 
-% 在主脚本中进行初始绘制
-% x = linspace(0, 2*pi, 100);
-% y = sin(x);
-% plot(x, y, 'b', 'DisplayName', 'sin(x)');
-xlabel('x');
-ylabel('y');
-title('Combined Plot');
-legend;
+% 生成直线数据
+x = 1:10;
+y = 2*x;
 
+% 绘制直线
+plot(x, y);
 
-% 调用类方法进行额外绘制
-plot_obj = PlotClass(fig);
-plot_obj.add_plot();
+% 定义注释位置和文本
+annotate_x = [2, 5, 8];
+annotate_y = 2*annotate_x;
+% 使用 \n 实现多行文本
+annotate_text = {sprintf('Point 1\nLine 2'), sprintf('Point 2\nAnother Line'), sprintf('Point 3\nNew Line')};
 
+% 添加注释
+for i = 1:length(annotate_x)
+    text(annotate_x(i), annotate_y(i), annotate_text{i}, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+end
+
+% 添加标题和标签
+title('Line with Multi - line Annotations');
+xlabel('X - axis');
+ylabel('Y - axis');
+
+% 显示网格线
+grid on;
